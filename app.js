@@ -19,51 +19,6 @@ var passport = require('passport');
 var util = require('util');
 var passportTwitterStrategy = require('passport-twitter').Strategy;
 
-//have two blank strings for access token and access secret
-// var accessToken = "";
-// var accessSecret = "";
-// var twitterOauth = {
-// 	consumer_key: process.env.twitter_client_id,
-// 	consumer_secret: process.env.twitter_client_secret,
-// 	access_token: accessToken,
-// 	access_token_secret: accessSecret
-// };
-
-//Set up passport session set up.
-//This allows persistant login sessions so the user doesn't need to keep logging in everytime
-//for their access token
-// passport.serializeUser(function(user, done) {
-// 	done(null, user);
-// });
-
-// passport.deserializeUser(function(obj, done) {
-// 	done(null, obj);
-// });
-
-// // Simple route middleware to ensure user is authenticated.
-// function ensureAuthenticated(req, res, next) {
-// 	if (req.isAuthenticated()) { return next(); }
-// 	res.redirect('/');
-// }
-
-
-// //Use TwitterStrategy with passport
-// passport.use(new passportTwitterStrategy({
-// 	consumerKey: process.env.twitter_client_id,
-// 	consumerSecret: process.env.twitter_client_secret,
-// 	callbackURL: "http://localhost:3000/auth/twitter/callback"
-// }, function (token, tokenSecret, profile, done) {
-// 	//setting up access token
-// 	accessToken = token;
-// 	accessSecret = tokenSecret;
-// 	twitterOauth.access_token = token;
-// 	twitterOauth.access_token_secret = tokenSecret;
-// 	//Continuing on
-// 	process.nextTick(function() {
-// 		return done(null, profile);
-// 	});
-// }));
-
 //Configures the Template engine
 app.engine('handlebars', handlebars());
 app.set('view engine', 'handlebars');
@@ -89,7 +44,7 @@ app.get('/auth/facebook', function(req, res) {
 	if (!req.query.code) {
 		var authUrl = graph.getOauthUrl({
 			'client_id': process.env.fb_appid,
-			'redirect_uri': 'http://localhost:3000/auth/facebook',
+			'redirect_uri': 'http://letsgetsocialagain.herokuapp.com/auth/facebook',
 			'scope': 'user_about_me, user_likes, user_friends'//you want to update scope to what you want in your app
 		});
 
@@ -102,7 +57,7 @@ app.get('/auth/facebook', function(req, res) {
 	}
 	graph.authorize({
 		'client_id': process.env.fb_appid,
-		'redirect_uri': 'http://localhost:3000/auth/facebook',
+		'redirect_uri': 'http://letsgetsocialagain.herokuapp.com/auth/facebook',
 		'client_secret': process.env.fb_appsecret,
 		'code': req.query.code
 	}, function( err, facebookRes) {
