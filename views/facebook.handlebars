@@ -26,9 +26,9 @@ polyline{
 </style>
 </head>
 
-<body>
-  <h3>Facebook mutual friends</h3>
-<button class="randomize">RANDOMIZE</button>
+<body class="addbgcolor">
+  <h2>Number of friends you share with these people!</h2>
+<button class="randomize">SHUFFLE</button>
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
@@ -75,7 +75,7 @@ d3.json('/facebook', function(error, res) {
   var values = [];
   values = res.map(function(d){return d.posts});
   console.log(values)
-  color.domain(res.map(function(d) { return d.name+","+d.posts; })).range(["#34495e", "#2c3e50", "#95a5a6", "#7f8c8d", "#ecf0f1", "#bdc3c7", "#e74c3c", "#c0392b"]);
+  color.domain(res.map(function(d) { return d.name+" - "+d.posts; })).range(["#34495e", "#2c3e50", "#95a5a6", "#7f8c8d", "#ecf0f1", "#bdc3c7", "#e74c3c", "#c0392b"]);
   var i=0
   change(color.domain().map(function(d){
     return { label: d, value: values[i++] }
@@ -105,7 +105,7 @@ function shuffle(array) {
 
 function randomData (array){
   return array.map(function(label){
-    return { label: label.name+","+label.posts, value: label.posts }
+    return { label: label.name+" - "+label.posts, value: label.posts }
   });
 }
 

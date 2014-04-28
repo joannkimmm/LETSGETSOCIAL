@@ -5679,6 +5679,15 @@ button.close {
 .visible-lg {
   display: none !important;
 }
+
+.addbgcolor {
+  background-color: #FDF5E6;
+}
+
+.centereverything {
+    text-align: center;
+}
+
 @media (max-width: 767px) {
   .visible-xs {
     display: block !important;
