@@ -5681,7 +5681,7 @@ button.close {
 }
 
 .addbgcolor {
-  background-color: #FDF5E6;
+  background-color: #FDF5E6 !important;
 }
 
 .centereverything {
