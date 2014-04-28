@@ -20,49 +20,49 @@ var util = require('util');
 var passportTwitterStrategy = require('passport-twitter').Strategy;
 
 //have two blank strings for access token and access secret
-var accessToken = "";
-var accessSecret = "";
-var twitterOauth = {
-	consumer_key: process.env.twitter_client_id,
-	consumer_secret: process.env.twitter_client_secret,
-	access_token: accessToken,
-	access_token_secret: accessSecret
-};
+// var accessToken = "";
+// var accessSecret = "";
+// var twitterOauth = {
+// 	consumer_key: process.env.twitter_client_id,
+// 	consumer_secret: process.env.twitter_client_secret,
+// 	access_token: accessToken,
+// 	access_token_secret: accessSecret
+// };
 
 //Set up passport session set up.
 //This allows persistant login sessions so the user doesn't need to keep logging in everytime
 //for their access token
-passport.serializeUser(function(user, done) {
-	done(null, user);
-});
+// passport.serializeUser(function(user, done) {
+// 	done(null, user);
+// });
 
-passport.deserializeUser(function(obj, done) {
-	done(null, obj);
-});
+// passport.deserializeUser(function(obj, done) {
+// 	done(null, obj);
+// });
 
-// Simple route middleware to ensure user is authenticated.
-function ensureAuthenticated(req, res, next) {
-	if (req.isAuthenticated()) { return next(); }
-	res.redirect('/');
-}
+// // Simple route middleware to ensure user is authenticated.
+// function ensureAuthenticated(req, res, next) {
+// 	if (req.isAuthenticated()) { return next(); }
+// 	res.redirect('/');
+// }
 
 
-//Use TwitterStrategy with passport
-passport.use(new passportTwitterStrategy({
-	consumerKey: process.env.twitter_client_id,
-	consumerSecret: process.env.twitter_client_secret,
-	callbackURL: "http://localhost:3000/auth/twitter/callback"
-}, function (token, tokenSecret, profile, done) {
-	//setting up access token
-	accessToken = token;
-	accessSecret = tokenSecret;
-	twitterOauth.access_token = token;
-	twitterOauth.access_token_secret = tokenSecret;
-	//Continuing on
-	process.nextTick(function() {
-		return done(null, profile);
-	});
-}));
+// //Use TwitterStrategy with passport
+// passport.use(new passportTwitterStrategy({
+// 	consumerKey: process.env.twitter_client_id,
+// 	consumerSecret: process.env.twitter_client_secret,
+// 	callbackURL: "http://localhost:3000/auth/twitter/callback"
+// }, function (token, tokenSecret, profile, done) {
+// 	//setting up access token
+// 	accessToken = token;
+// 	accessSecret = tokenSecret;
+// 	twitterOauth.access_token = token;
+// 	twitterOauth.access_token_secret = tokenSecret;
+// 	//Continuing on
+// 	process.nextTick(function() {
+// 		return done(null, profile);
+// 	});
+// }));
 
 //Configures the Template engine
 app.engine('handlebars', handlebars());
@@ -88,9 +88,9 @@ app.get('/', function(req,res) {
 app.get('/auth/facebook', function(req, res) {
 	if (!req.query.code) {
 		var authUrl = graph.getOauthUrl({
-			'client_id': process.env.facebook_client_id,
+			'client_id': process.env.fb_appid,
 			'redirect_uri': 'http://localhost:3000/auth/facebook',
-			'scope': 'user_about_me'//you want to update scope to what you want in your app
+			'scope': 'user_about_me, user_likes, user_friends'//you want to update scope to what you want in your app
 		});
 
 		if (!req.query.error) {
@@ -101,47 +101,104 @@ app.get('/auth/facebook', function(req, res) {
 		return;
 	}
 	graph.authorize({
-		'client_id': process.env.facebook_client_id,
+		'client_id': process.env.fb_appid,
 		'redirect_uri': 'http://localhost:3000/auth/facebook',
-		'client_secret': process.env.facebook_client_secret,
+		'client_secret': process.env.fb_appsecret,
 		'code': req.query.code
 	}, function( err, facebookRes) {
-		res.redirect('/UserHasLoggedIn');
+		res.redirect('/facebook/homepage');
+			// /UserHasLoggedIn');
 	});
 });
 
-app.get('/UserHasLoggedIn', function(req, res) {
-	graph.get('me', function(err, response) {
-		console.log(err); //if there is an error this will return a value
-		data = { facebookData: response};
-		res.render('facebook', data);
+app.get('/facebook', function(req, res) {
+	// graph.get('/me', function(err, response) {
+		//console.log(response);
+	// 	console.log(err); //if there is an error this will return a value
+	// 	data = { facebookData: response};
+		graph.get('/me/friends', function(err, response) {
+		//data = {};
+		var data = [];
+		// console.log(response);
+		function increment(i) {
+
+		var tempJSON = {};
+		graph.get("/me/mutualfriends/" + response.data[i].id, function(err2, response2) {
+
+		if(i < 11) {
+			var str = response.data[i].name;
+			// console.log(str);
+			tempJSON.posts = response2.data.length;
+			tempJSON.name = str.substr(0, str.indexOf(' '));
+			//tempJSON.posts = response2.data.length;
+			data.push(tempJSON);
+			increment(i+1);
+		  }
+		  else {
+		  	console.log(data);
+		  	res.json(data);
+		  }
+		});
+	 }
+	increment(0);
 	});
+		//res.render('facebook');
+			// , data);
+	// });
 });
 
+app.get('/facebook/homepage', function(req, res) {
+	res.render('facebook');
+	// graph.get('/me/friends', function(err, response) {
+	// 	data = {};
+	// 	var data = [];
+	// 	// console.log(response);
+	// 	function increment(i) {
+
+	// 	var tempJSON = {};
+	// 	graph.get("/me/mutualfriends/" + response.data[i].id, function(err2, response2) {
+	// 	if(i < 12) {
+	// 		var str = response.data[i].name;
+	// 		// console.log(str);
+	// 		tempJSON.posts = response2.data.length;
+	// 		tempJSON.name = str.substr(0, str.indexOf(' '));
+	// 		tempJSON.posts = response2.data.length;
+	// 		data.push(tempJSON);
+	// 		increment(i+1);
+	// 	  }
+	// 	  else {
+	// 	  	console.log(data);
+	// 	  	res.json(data);
+	// 	  }
+	// 	});
+	// }
+	// increment(0);
+	// });
+});
 
 //twitter authentication Oauth setup
 //this will set up twitter oauth for any user not just one
-app.get('/auth/twitter', passport.authenticate('twitter'), function(req, res) {
-	//nothing here because callback redirects to /auth/twitter/callback
-});
+// app.get('/auth/twitter', passport.authenticate('twitter'), function(req, res) {
+// 	//nothing here because callback redirects to /auth/twitter/callback
+// });
 
 //callback. authenticates again and then goes to twitter
-app.get('/auth/twitter/callback', 
-	passport.authenticate('twitter', { failureRedirect: '/' }),
-	function(req, res) {
-		res.redirect('/twitter');
-	});
+// app.get('/auth/twitter/callback', 
+// 	passport.authenticate('twitter', { failureRedirect: '/' }),
+// 	function(req, res) {
+// 		res.redirect('/twitter');
+// 	});
 
 
-app.get('/twitter', ensureAuthenticated, function(req, res) {
-	//I can use twitterOauth as previously it's an array set up with the correcet information
-	var T = new twit(twitterOauth); 
-	T.get('/friends/list', function (err, reply) {
-		console.log(err); //If there is an error this will return a value
-		data = { twitterData: reply };
-		res.render('twitter', data);
-	});
-});
+// app.get('/twitter', ensureAuthenticated, function(req, res) {
+// 	//I can use twitterOauth as previously it's an array set up with the correcet information
+// 	var T = new twit(twitterOauth); 
+// 	T.get('/friends/list', function (err, reply) {
+// 		console.log(err); //If there is an error this will return a value
+// 		data = { twitterData: reply };
+// 		res.render('twitter', data);
+// 	});
+// });
 
 //set environment ports and start application
 app.set('port', process.env.PORT || 3000);
